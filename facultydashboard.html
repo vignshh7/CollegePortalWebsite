@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faculty Panel - DRS Institute of Technology</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(160deg, #d6e6f2 0%, #a3bffa 50%, #7f9cf5 100%);
+            color: #1a2a44;
+            line-height: 1.8;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="rgba(255,255,255,0.1)" fill-opacity="1" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,138.7C672,128,768,160,864,181.3C960,203,1056,213,1152,197.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E') no-repeat bottom;
+            z-index: -1;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 70px;
+            width: calc(100% - 70px);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(45, 84, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .header.expanded {
+            left: 250px;
+            width: calc(100% - 250px);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #1a2a44;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.4s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .sidenav {
+            height: 100%;
+            width: 70px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(180deg, #2c3e50, #1a252f);
+            transition: width 0.3s ease;
+            overflow-x: hidden;
+            padding-top: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 3;
+        }
+
+        .sidenav.expanded {
+            width: 250px;
+        }
+
+        .sidenav a {
+            padding: 15px 8px 15px 20px;
+            text-decoration: none;
+            font-size: 16px;
+            color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .sidenav a:hover {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: #fff;
+        }
+
+        .sidenav a.active {
+            background: linear-gradient(135deg, #2980b9, #1e90ff);
+            color: #fff;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidenav a i {
+            margin-right: 15px;
+            min-width: 30px;
+        }
+
+        .sidenav .text {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidenav.expanded .text {
+            display: inline;
+            opacity: 1;
+        }
+
+        .main {
+            margin-left: 70px;
+            padding: 80px 30px 30px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+            flex-grow: 1;
+        }
+
+        .main.expanded {
+            margin-left: 250px;
+        }
+
+        .section {
+            display: none;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .section:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        h2 {
+            font-size: 30px;
+            color: #2d5488;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, #63b3ed, #2d5488);
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2:hover::after {
+            width: 80px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 20px 0 10px;
+            color: #1a2a44;
+        }
+
+        #dashboard { border-left: 4px solid #e74c3c; }
+        #spotlight, #content-creator { border-left: 4px solid #f1c40f; }
+        #manage-marks, #attendance, #progress, #lecture-sharing { border-left: 4px solid #2ecc71; }
+        #notifications, #contact-students { border-left: 4px solid #e67e22; }
+        #contact-alumni { border-left: 4px solid #d35400; }
+        #manage-course-content { border-left: 4px solid #3498db; }
+
+        .chat-window {
+            position: fixed;
+            bottom: 80px;
+            right: 30px;
+            width: 300px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .chat-window.active {
+            display: flex;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: #fff;
+            padding: 10px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .chat-header button:hover {
+            color: #ffebcd;
+        }
+
+        .chat-body {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .chat-footer {
+            padding: 10px;
+            border-top: 1px solid rgba(45, 84, 136, 0.2);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-footer input {
+            width: 70%;
+            padding: 8px;
+            border: 1px solid rgba(45, 84, 136, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .chat-footer input:focus {
+            border-color: #2d5488;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+        }
+
+        .chat-footer button {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .chat-footer button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+
+        .student-item, .alumni-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .student-item:hover, .alumni-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-btn {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .message-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(45, 84, 136, 0.2);
+        }
+
+        th {
+            background: linear-gradient(135deg, #2d5488, #63b3ed);
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(240, 247, 255, 0.5);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .button {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            margin-top: 15px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: rgba(45, 84, 136, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress {
+            height: 20px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            text-align: center;
+            color: #fff;
+            line-height: 20px;
+            transition: width 0.5s ease;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid rgba(45, 84, 136, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #2d5488;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            box-shadow: 0 0 8px rgba(45, 84, 136, 0.2);
+        }
+
+        footer {
+            background: linear-gradient(160deg, #d6e6f2 0%, #a3bffa 70%, #7f9cf5 100%);
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-top: 3px solid rgba(45, 84, 136, 0.3);
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 15px 15px 0 0;
+            position: relative;
+        }
+
+        footer p {
+            font-size: 15px;
+            color: #1a2a44;
+            margin: 8px 0;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                left: 0;
+                width: 100%;
+                padding: 10px 15px;
+            }
+
+            .sidenav {
+                width: 0;
+            }
+
+            .sidenav.expanded {
+                width: 200px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 60px 15px 15px;
+            }
+
+            .main.expanded {
+                margin-left: 200px;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .chat-window {
+                width: 90%;
+                right: 5%;
+                bottom: 60px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+        }
+
+        .message.sent { text-align: right; background: #e0f7fa; padding: 5px; margin: 5px 0; border-radius: 5px; }
+        .message.received { text-align: left; background: #f1f1f1; padding: 5px; margin: 5px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header" id="myHeader">
+        <h1 id="headerTitle">Faculty Panel - DRS Institute of Technology</h1>
+        <div class="user-info">
+            <span>Dr. Smith</span>
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+        </div>
+    </div>
+
+    <div class="sidenav" id="mySidenav">
+        <a href="#dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i><span class="text">Dashboard</span></a>
+        <a href="#spotlight" class="nav-link"><i class="fas fa-star"></i><span class="text">Spotlight</span></a>
+        <a href="#manage-marks" class="nav-link"><i class="fas fa-edit"></i><span class="text">Manage Marks</span></a>
+        <a href="#manage-course-content" class="nav-link"><i class="fas fa-folder-open"></i><span class="text">Manage Course Content</span></a>
+        <a href="#attendance" class="nav-link"><i class="fas fa-user-check"></i><span class="text">Attendance</span></a>
+        <a href="#progress" class="nav-link"><i class="fas fa-chart-line"></i><span class="text">Student Progress</span></a>
+        <a href="#content-creator" class="nav-link"><i class="fas fa-book"></i><span class="text">Content Creator</span></a>
+        <a href="#notifications" class="nav-link"><i class="fas fa-bell"></i><span class="text">Notifications</span></a>
+        <a href="#lecture-sharing" class="nav-link"><i class="fas fa-video"></i><span class="text">Lecture Sharing</span></a>
+        <a href="#contact-students" class="nav-link"><i class="fas fa-envelope"></i><span class="text">Contact Students</span></a>
+        <a href="#contact-alumni" class="nav-link"><i class="fas fa-users"></i><span class="text">Contact Alumni</span></a>
+    </div>
+
+    <div class="main" id="mainContent">
+        <div id="dashboard" class="section active">
+            <h2>Dashboard</h2>
+            <table>
+                <tr><th>Metric</th><th>Value</th></tr>
+                <tr><td>Total Students</td><td>50</td></tr>
+                <tr><td>Classes Today</td><td>3</td></tr>
+            </table>
+        </div>
+
+        <div id="spotlight" class="section">
+            <h2>Spotlight</h2>
+            <form onsubmit="addSpotlight(event)">
+                <input type="text" id="spotlightText" placeholder="Enter spotlight text" required>
+                <button class="button">Add</button>
+            </form>
+            <ul id="spotlightList">
+                <li>Achievement: Top Faculty (2025-03-27 10:00:00)</li>
+            </ul>
+        </div>
+
+        <div id="manage-marks" class="section">
+            <h2>Examination & Grading</h2>
+            <form id="marksForm" onsubmit="updateMarks(event)">
+                <select id="markStudent" required>
+                    <option value="" disabled selected>Select Student</option>
+                    <option value="1">John Doe</option>
+                    <option value="2">Jane Doe</option>
+                </select>
+                <input type="text" id="markSubject" placeholder="Subject" required>
+                <input type="number" id="markScore" placeholder="Score (0-100)" min="0" max="100" required>
+                <textarea id="markComments" placeholder="Faculty Comments (optional)" rows="3"></textarea>
+                <button class="button">Update Marks</button>
+            </form>
+            <h3>Student Results</h3>
+            <table id="marksTable">
+                <tr><th>Student</th><th>Subject</th><th>Score</th><th>Grade</th><th>Result Status</th><th>Comments</th></tr>
+                <tr><td>John Doe</td><td>Math</td><td>85/100</td><td>A</td><td>Pass</td><td>Great work!</td></tr>
+            </table>
+        </div>
+
+        <div id="manage-course-content" class="section">
+            <h2>Manage Course Content</h2>
+            <form id="courseContentForm" enctype="multipart/form-data" onsubmit="uploadCourseContent(event)">
+                <input type="text" id="contentTitle" name="title" placeholder="Content Title" required>
+                <select id="contentType" name="type" required>
+                    <option value="">Select Type</option>
+                    <option value="syllabus">Syllabus</option>
+                    <option value="study_material">Study Material</option>
+                    <option value="assignment">Assignment</option>
+                </select>
+                <input type="file" id="contentFile" name="content_file" accept=".pdf,.doc,.docx" required>
+                <select id="courseId" name="course_id">
+                    <option value="">Select Course (Optional)</option>
+                    <option value="1">Computer Science</option>
+                    <option value="2">Mathematics</option>
+                </select>
+                <button class="button">Upload</button>
+            </form>
+            <h3>Uploaded Content</h3>
+            <ul id="courseContentList">
+                <li>Syllabus: Introduction to CS (<a href="#" target="_blank">View</a>)</li>
+            </ul>
+        </div>
+
+        <div id="attendance" class="section">
+            <h2>Mark Attendance</h2>
+            <form onsubmit="markAttendance(event)">
+                <select id="attStudent" required>
+                    <option value="">Select Student</option>
+                    <option value="1">John Doe</option>
+                    <option value="2">Jane Doe</option>
+                </select>
+                <select id="attCourse" required>
+                    <option value="">Select Course</option>
+                    <option value="1">Computer Science</option>
+                    <option value="2">Mathematics</option>
+                </select>
+                <input type="date" id="attDate" required>
+                <select id="attStatus" required>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                </select>
+                <button class="button">Mark</button>
+            </form>
+            <h3>Attendance Records</h3>
+            <table id="attTable">
+                <tr><th>Student</th><th>Course</th><th>Date</th><th>Status</th></tr>
+                <tr><td>John Doe</td><td>Computer Science</td><td>2025-03-27</td><td>Present</td></tr>
+            </table>
+        </div>
+
+        <div id="progress" class="section">
+            <h2>Student Progress</h2>
+            <table id="progressTable">
+                <tr><th>Subject/Course</th><th>Marks (%)</th><th>Attendance (%)</th><th>Overall Progress (%)</th></tr>
+                <tr>
+                    <td>Math</td>
+                    <td>85</td>
+                    <td>90</td>
+                    <td><div class="progress-bar"><div class="progress" style="width: 87%;">87%</div></div></td>
+                </tr>
+            </table>
+            <p>Average Marks: 85% | Average Attendance: 90%</p>
+        </div>
+
+        <div id="content-creator" class="section">
+            <h2>Content Creator</h2>
+            <form onsubmit="createContent(event)">
+                <input type="text" id="contentTitle" placeholder="Quiz Title" required>
+                <select id="contentStudent" required>
+                    <option value="1">John Doe</option>
+                    <option value="2">Jane Doe</option>
+                </select>
+                <button class="button">Create</button>
+            </form>
+            <ul id="contentList">
+                <li>Quiz 1 (Assigned to ID: 1)</li>
+            </ul>
+        </div>
+
+        <div id="notifications" class="section">
+            <h2>Notifications</h2>
+            <form onsubmit="sendNotification(event)">
+                <input type="text" id="notifText" placeholder="Notification Text" required>
+                <button class="button">Send</button>
+            </form>
+            <ul id="notificationsList">
+                <li>Sample Notification (2025-03-27 10:00:00)</li>
+            </ul>
+        </div>
+
+        <div id="lecture-sharing" class="section">
+            <h2>Lecture Sharing</h2>
+            <form onsubmit="uploadLecture(event)">
+                <input type="text" id="lectureTitle" placeholder="Lecture Title" required>
+                <input type="text" id="lecturePath" placeholder="File Path" required>
+                <button class="button">Upload</button>
+            </form>
+            <ul id="lectureList">
+                <li>Introduction to CS (<a href="#" target="_blank">intro_cs.mp4</a>)</li>
+            </ul>
+        </div>
+
+        <div id="contact-students" class="section">
+            <h2>Contact Students</h2>
+            <div class="student-item">
+                <span>John Doe</span>
+                <button class="message-btn" onclick="openChat('1', 'John Doe')">Message</button>
+            </div>
+            <div class="student-item">
+                <span>Jane Doe</span>
+                <button class="message-btn" onclick="openChat('2', 'Jane Doe')">Message</button>
+            </div>
+        </div>
+
+        <div id="contact-alumni" class="section">
+            <h2>Contact Alumni</h2>
+            <div class="alumni-item">
+                <span>Alumni One</span>
+                <button class="message-btn" style="background: linear-gradient(135deg, #d35400, #e67e22);" onclick="openChat('3', 'Alumni One')">Message</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header"><span id="chatTitle"></span><button onclick="closeChat()">✖</button></div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-footer"><input type="text" id="chatInput" placeholder="Type a message..."><button onclick="sendMessage()">Send</button></div>
+    </div>
+
+    <footer><p>© 2025 DRS Institute Of Technology. All rights reserved.</p></footer>
+
+    <script>
+        let recipientId = '', lastUpdate = 0, lastMessageId = 0;
+        const facultyId = '1'; // Mock faculty ID
+
+        document.getElementById('mySidenav').addEventListener('click', e => {
+            if (e.target.closest('.nav-link')) toggleNav();
+        });
+
+        document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', e => {
+            e.preventDefault();
+            const id = l.getAttribute('href').slice(1);
+            setActiveSection(id);
+        }));
+
+        function toggleNav() {
+            ['mySidenav', 'mainContent', 'myHeader'].forEach(id => document.getElementById(id).classList.toggle('expanded'));
+        }
+
+        function setActiveSection(id) {
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.toggle('active', n.getAttribute('href') === `#${id}`));
+            document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === id));
+            document.getElementById('headerTitle').textContent = `Faculty Panel - DRS Institute of Technology - ${document.getElementById(id).querySelector('h2').textContent}`;
+        }
+
+        function updateDisplay(target, data) {
+            const displays = {
+                spotlight: d => `<li>${d.content} (${new Date(d.created_at).toLocaleString()})</li>`,
+                'manage-marks': d => `<tr><td>${d.username}</td><td>${d.subject}</td><td>${d.score}/100</td><td>${d.grade || 'N/A'}</td><td>${d.result_status || 'Pending'}</td><td>${d.comments || 'No comments'}</td></tr>`,
+                'manage-course-content': d => `<li>${d.type}: ${d.title} (<a href="${d.file_path}" target="_blank">View</a>)</li>`,
+                attendance: d => `<tr><td>${d.username}</td><td>${d.course_name}</td><td>${d.date}</td><td>${d.status}</td></tr>`,
+                progress: d => `<tr><td>${d.subject || d.course_name}</td><td>${d.score || 'N/A'}</td><td>${d.attendance || 'N/A'}</td><td><div class="progress-bar"><div class="progress" style="width:${d.progress || 0}%;">${d.progress || 0}%</div></div></td></tr>`,
+                'content-creator': d => `<li>${d.title} (Assigned to ID: ${d.assigned_to})</li>`,
+                notifications: d => `<li>${d.content} (${new Date(d.created_at).toLocaleString()})</li>`,
+                'lecture-sharing': d => `<li>${d.title} (<a href="${d.file_path}" target="_blank">${d.file_path.split('/').pop()}</a>)</li>`,
+                messages: d => `<div class="message ${d.sender_id === facultyId ? 'sent' : 'received'}"><strong>${d.sender_name}:</strong> ${d.message}<small>(${new Date(d.timestamp).toLocaleString()})</small></div>`
+            };
+
+            const el = document.getElementById(`${target}List`) || document.getElementById(`${target}Table`) || document.getElementById('chatBody');
+            if (!el || !displays[target]) return;
+
+            const isTable = el.tagName === 'TABLE';
+            const header = isTable ? `<tr>${el.querySelector('tr').innerHTML}</tr>` : '';
+            const content = data && data.length ? data.map(displays[target]).join('') : '<li>No data available</li>';
+            el.innerHTML = isTable ? header + content : content;
+
+            if (target === 'messages') el.scrollTop = el.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message && recipientId) {
+                const timestamp = new Date().toLocaleString();
+                const chatBody = document.getElementById('chatBody');
+                chatBody.innerHTML += `
+                    <div class="message sent">
+                        <strong>Dr. Smith:</strong> ${message}
+                        <small>(${timestamp})</small>
+                    </div>`;
+                chatBody.scrollTop = chatBody.scrollHeight;
+                input.value = '';
+                console.log(`Sending message to ${recipientId}: ${message}`);
+            }
+        }
+
+        function fetchMessages(recipientId) {
+            const mockMessages = [
+                { sender_id: facultyId, sender_name: 'Dr. Smith', message: 'Hello!', timestamp: new Date().toISOString() },
+                { sender_id: recipientId, sender_name: recipientId === '1' ? 'John Doe' : 'Jane Doe', message: 'Hi!', timestamp: new Date().toISOString() }
+            ];
+            updateDisplay('messages', mockMessages);
+        }
+
+        function setupRealTimeUpdates() {
+            setInterval(() => {
+                if (recipientId) fetchMessages(recipientId);
+            }, 5000);
+        }
+
+        function openChat(id, name) {
+            recipientId = id;
+            lastMessageId = 0;
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.add('active');
+            document.getElementById('chatTitle').textContent = `Chat with ${name}`;
+            document.getElementById('chatBody').innerHTML = '';
+            fetchMessages(recipientId);
+        }
+
+        function closeChat() {
+            document.getElementById('chatWindow').classList.remove('active');
+            recipientId = '';
+        }
+
+        function updateMarks(event) {
+            event.preventDefault();
+            const studentId = document.getElementById('markStudent').value;
+            const subject = document.getElementById('markSubject').value.trim();
+            const score = document.getElementById('markScore').value;
+            const comments = document.getElementById('markComments').value.trim();
+
+            if (!studentId || !subject || !score) {
+                alert('Please fill all required fields.');
+                return;
+            }
+            if (isNaN(score) || score < 0 || score > 100) {
+                alert('Score must be between 0 and 100.');
+                return;
+            }
+
+            const grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : score >= 50 ? 'E' : 'F';
+            const result_status = score >= 50 ? 'Pass' : 'Fail';
+            const mockData = [{ username: document.getElementById('markStudent').selectedOptions[0].text, subject, score, grade, result_status, comments }];
+            updateDisplay('manage-marks', mockData);
+            document.getElementById('marksForm').reset();
+            alert('Marks updated successfully!');
+        }
+
+        function markAttendance(event) {
+            event.preventDefault();
+            const studentId = document.getElementById('attStudent').value;
+            const courseId = document.getElementById('attCourse').value;
+            const date = document.getElementById('attDate').value;
+            const status = document.getElementById('attStatus').value;
+
+            if (!studentId || !courseId || !date || !status) {
+                alert('Please fill all fields.');
+                return;
+            }
+
+            const mockData = [{
+                username: document.getElementById('attStudent').selectedOptions[0].text,
+                course_name: document.getElementById('attCourse').selectedOptions[0].text,
+                date,
+                status
+            }];
+            updateDisplay('attendance', mockData);
+            document.querySelector('#attendance form').reset();
+            alert('Attendance marked successfully!');
+        }
+
+        function uploadCourseContent(event) {
+            event.preventDefault();
+            const form = document.getElementById('courseContentForm');
+            const formData = new FormData(form);
+            const mockData = [{
+                type: formData.get('type'),
+                title: formData.get('title'),
+                file_path: '#'
+            }];
+            updateDisplay('manage-course-content', mockData);
+            form.reset();
+            alert('Content uploaded successfully!');
+        }
+
+        function createContent(event) {
+            event.preventDefault();
+            const title = document.getElementById('contentTitle').value;
+            const studentId = document.getElementById('contentStudent').value;
+            if (title && studentId) {
+                const mockData = [{ title, assigned_to: studentId }];
+                updateDisplay('content-creator', mockData);
+                document.querySelector('#content-creator form').reset();
+                alert('Quiz created successfully!');
+            }
+        }
+
+        function sendNotification(event) {
+            event.preventDefault();
+            const text = document.getElementById('notifText').value;
+            if (text) {
+                const mockData = [{ content: text, created_at: new Date().toISOString() }];
+                updateDisplay('notifications', mockData);
+                document.getElementById('notifText').value = '';
+                alert('Notification sent successfully!');
+            }
+        }
+
+        function uploadLecture(event) {
+            event.preventDefault();
+            const title = document.getElementById('lectureTitle').value;
+            const filePath = document.getElementById('lecturePath').value;
+            if (title && filePath) {
+                const mockData = [{ title, file_path: filePath }];
+                updateDisplay('lecture-sharing', mockData);
+                document.querySelector('#lecture-sharing form').reset();
+                alert('Lecture uploaded successfully!');
+            }
+        }
+
+        function addSpotlight(event) {
+            event.preventDefault();
+            const text = document.getElementById('spotlightText').value;
+            if (text) {
+                const mockData = [{ content: text, created_at: new Date().toISOString() }];
+                updateDisplay('spotlight', mockData);
+                document.getElementById('spotlightText').value = '';
+                alert('Spotlight added successfully!');
+            }
+        }
+
+        function logout() {
+            window.location.href = 'index.html';
+        }
+
+        window.onload = () => {
+            setActiveSection('dashboard');
+            setupRealTimeUpdates();
+
+            // Mock initial data
+            updateDisplay('spotlight', [{ content: 'Achievement: Top Faculty', created_at: '2025-03-27T10:00:00' }]);
+            updateDisplay('manage-marks', [{ username: 'John Doe', subject: 'Math', score: 85, grade: 'A', result_status: 'Pass', comments: 'Great work!' }]);
+            updateDisplay('manage-course-content', [{ type: 'Syllabus', title: 'Introduction to CS', file_path: '#' }]);
+            updateDisplay('attendance', [{ username: 'John Doe', course_name: 'Computer Science', date: '2025-03-27', status: 'Present' }]);
+            updateDisplay('progress', [{ subject: 'Math', score: 85, attendance: 90, progress: 87 }]);
+            updateDisplay('content-creator', [{ title: 'Quiz 1', assigned_to: '1' }]);
+            updateDisplay('notifications', [{ content: 'Sample Notification', created_at: '2025-03-27T10:00:00' }]);
+            updateDisplay('lecture-sharing', [{ title: 'Introduction to CS', file_path: 'intro_cs.mp4' }]);
+        };
+    </script>
+</body>
+</html>

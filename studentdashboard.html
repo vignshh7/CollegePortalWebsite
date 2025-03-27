@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Panel - DRS Institute of Technology</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(160deg, #d6e6f2 0%, #a3bffa 50%, #7f9cf5 100%);
+            color: #1a2a44;
+            line-height: 1.8;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="rgba(255,255,255,0.1)" fill-opacity="1" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,138.7C672,128,768,160,864,181.3C960,203,1056,213,1152,197.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E') no-repeat bottom;
+            z-index: -1;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 70px;
+            width: calc(100% - 70px);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(45, 84, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .header.expanded {
+            left: 250px;
+            width: calc(100% - 250px);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #1a2a44;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.4s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .sidenav {
+            height: 100%;
+            width: 70px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(180deg, #2c3e50, #1a252f);
+            transition: width 0.3s ease;
+            overflow-x: hidden;
+            padding-top: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 3;
+        }
+
+        .sidenav.expanded {
+            width: 250px;
+        }
+
+        .sidenav a {
+            padding: 15px 8px 15px 20px;
+            text-decoration: none;
+            font-size: 16px;
+            color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .sidenav a:hover {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: #fff;
+        }
+
+        .sidenav a.active {
+            background: linear-gradient(135deg, #2980b9, #1e90ff);
+            color: #fff;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidenav a i {
+            margin-right: 15px;
+            min-width: 30px;
+        }
+
+        .sidenav .text {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidenav.expanded .text {
+            display: inline;
+            opacity: 1;
+        }
+
+        .main {
+            margin-left: 70px;
+            padding: 80px 30px 30px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+            flex-grow: 1;
+        }
+
+        .main.expanded {
+            margin-left: 250px;
+        }
+
+        .section {
+            display: none;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .section:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        h2 {
+            font-size: 30px;
+            color: #2d5488;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, #63b3ed, #2d5488);
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2:hover::after {
+            width: 80px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 20px 0 10px;
+            color: #1a2a44;
+        }
+
+        #dashboard { border-left: 4px solid #e74c3c; }
+        #spotlight, #content, #exams { border-left: 4px solid #f1c40f; }
+        #marks { border-left: 4px solid #9b59b6; }
+        #attendance { border-left: 4px solid #e9c46a; }
+        #progress, #lectures { border-left: 4px solid #2ecc71; }
+        #notifications, #calendar, #contact-faculty { border-left: 4px solid #e67e22; }
+        #mentorship { border-left: 4px solid #264653; }
+        #contact-alumni { border-left: 4px solid #d35400; }
+        #internship-jobs { border-left: 4px solid #16a085; }
+        #academic-wallet { border-left: 4px solid #8e44ad; }
+        #code-platform { border-left: 4px solid #e67e22; }
+        #study-streak { border-left: 4px solid #ff6f61; }
+        #digital-id { border-left: 4px solid #1abc9c; }
+        #personal-details { border-left: 4px solid #3498db; }
+        #course-materials { border-left: 4px solid #f1c40f; }
+        #submit-assignments { border-left: 4px solid #e74c3c; }
+
+        #personal-details input, #personal-details textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid rgba(45, 84, 136, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        #personal-details input:focus, #personal-details textarea:focus {
+            border-color: #2d5488;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            box-shadow: 0 0 8px rgba(45, 84, 136, 0.2);
+        }
+
+        #personal-details label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 700;
+            color: #1a2a44;
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 80px;
+            right: 30px;
+            width: 300px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .chat-window.active {
+            display: flex;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: #fff;
+            padding: 10px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .chat-header button:hover {
+            color: #ffebcd;
+        }
+
+        .chat-body {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .chat-footer {
+            padding: 10px;
+            border-top: 1px solid rgba(45, 84, 136, 0.2);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-footer input {
+            width: 70%;
+            padding: 8px;
+            border: 1px solid rgba(45, 84, 136, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .chat-footer input:focus {
+            border-color: #2d5488;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+        }
+
+        .chat-footer button {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .chat-footer button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+
+        .faculty-item, .alumni-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .faculty-item:hover, .alumni-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-btn {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .message-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(45, 84, 136, 0.2);
+        }
+
+        th {
+            background: linear-gradient(135deg, #2d5488, #63b3ed);
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(240, 247, 255, 0.5);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .button {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            margin-top: 15px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: rgba(45, 84, 136, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress {
+            height: 20px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            text-align: center;
+            color: #fff;
+            line-height: 20px;
+            transition: width 0.5s ease;
+        }
+
+        .CodeMirror {
+            height: 300px;
+            font-size: 14px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-output {
+            padding: 15px;
+            background: rgba(240, 247, 255, 0.8);
+            border-radius: 15px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .id-card {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            padding: 20px;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .id-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        .id-header {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: #fff;
+            padding: 10px;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .qrcode {
+            width: 150px;
+            height: 150px;
+            margin: 15px auto;
+        }
+
+        .id-footer {
+            background: rgba(236, 240, 241, 0.8);
+            padding: 10px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        footer {
+            background: linear-gradient(160deg, #d6e6f2 0%, #a3bffa 70%, #7f9cf5 100%);
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-top: 3px solid rgba(45, 84, 136, 0.3);
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 15px 15px 0 0;
+            position: relative;
+        }
+
+        footer p {
+            font-size: 15px;
+            color: #1a2a44;
+            margin: 8px 0;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                left: 0;
+                width: 100%;
+                padding: 10px 15px;
+            }
+
+            .sidenav {
+                width: 0;
+            }
+
+            .sidenav.expanded {
+                width: 200px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 60px 15px 15px;
+            }
+
+            .main.expanded {
+                margin-left: 200px;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .chat-window {
+                width: 90%;
+                right: 5%;
+                bottom: 60px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header" id="myHeader">
+        <h1 id="headerTitle">Student Panel - DRS Institute of Technology</h1>
+        <div class="user-info">
+            <span id="username">John Doe</span>
+            <a href="index.html"><button class="logout-btn" type="button">Log Out</button></a>
+        </div>
+    </div>
+
+    <div class="sidenav" id="mySidenav">
+        <a href="#personal-details" class="nav-link"><i class="fas fa-user"></i><span class="text">Personal Details</span></a>
+        <a href="#attendance" class="nav-link"><i class="fas fa-user-check"></i><span class="text">Attendance</span></a>
+        <a href="#spotlight" class="nav-link"><i class="fas fa-star"></i><span class="text">Spotlight</span></a>
+        <a href="#course-materials" class="nav-link"><i class="fas fa-folder-open"></i><span class="text">Course Materials</span></a>
+        <a href="#marks" class="nav-link"><i class="fas fa-edit"></i><span class="text">Marks</span></a>
+        <a href="#content" class="nav-link"><i class="fas fa-book"></i><span class="text">Course Content</span></a>
+        <a href="#notifications" class="nav-link"><i class="fas fa-bell"></i><span class="text">Notifications</span></a>
+        <a href="#lectures" class="nav-link"><i class="fas fa-video"></i><span class="text">Lectures</span></a>
+        <a href="#contact-faculty" class="nav-link"><i class="fas fa-envelope"></i><span class="text">Contact Faculty</span></a>
+        <a href="#submit-assignments" class="nav-link"><i class="fas fa-upload"></i><span class="text">Submit Assignments</span></a>
+        <a href="#progress" class="nav-link"><i class="fas fa-chart-line"></i><span class="text">Progress</span></a>
+        <a href="#contact-alumni" class="nav-link"><i class="fas fa-users"></i><span class="text">Contact Alumni</span></a>
+        <a href="#code-platform" class="nav-link"><i class="fas fa-code"></i><span class="text">Code Platform</span></a>
+        <a href="#digital-id" class="nav-link"><i class="fas fa-id-card"></i><span class="text">Digital ID</span></a>
+    </div>
+
+    <div class="main" id="mainContent">
+        <div id="personal-details" class="section active">
+            <h2>Personal Details</h2>
+            <form id="personalDetailsForm" onsubmit="updatePersonalDetails(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div>
+                        <label>Full Name:</label>
+                        <input type="text" name="full_name" value="John Doe" required>
+                    </div>
+                    <div>
+                        <label>Email:</label>
+                        <input type="email" name="email" value="john.doe@example.com" required>
+                    </div>
+                    <div>
+                        <label>Phone:</label>
+                        <input type="tel" name="phone" value="1234567890" pattern="[0-9]{10}" required>
+                    </div>
+                    <div>
+                        <label>Date of Birth:</label>
+                        <input type="date" name="date_of_birth" value="2000-01-01" required>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label>Address:</label>
+                        <textarea name="address" rows="3">123 Main St, City, Country</textarea>
+                    </div>
+                    <div>
+                        <label>Emergency Contact:</label>
+                        <input type="tel" name="emergency_contact" value="0987654321" pattern="[0-9]{10}" required>
+                    </div>
+                </div>
+                <button type="submit" class="button">Update Details</button>
+            </form>
+        </div>
+
+        <div id="notifications" class="section">
+            <h2>Notifications</h2>
+            <ul id="notifList">
+                <li>Sample Notification (2025-03-27 10:00:00)</li>
+            </ul>
+        </div>
+
+        <div id="course-materials" class="section">
+            <h2>Course Materials</h2>
+            <ul>
+                <li>Syllabus: Introduction to CS - <a href="#" download>Download</a></li>
+                <li>Assignment: Project 1 - <a href="#" download>Download</a></li>
+            </ul>
+        </div>
+
+        <div id="attendance" class="section">
+            <h2>Attendance</h2>
+            <h3>Course-wise Attendance</h3>
+            <table id="courseAttendanceTable">
+                <thead>
+                    <tr>
+                        <th>Course Name</th>
+                        <th>Total Days</th>
+                        <th>Days Present</th>
+                        <th>Attendance Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Computer Science</td>
+                        <td>30</td>
+                        <td>25</td>
+                        <td style="color: green;">83%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="dashboard" class="section">
+            <h2>Dashboard</h2>
+            <table>
+                <tr><th>Metric</th><th>Value</th></tr>
+                <tr><td>Classes Today</td><td>2</td></tr>
+                <tr><td>Pending Assignments</td><td>3</td></tr>
+            </table>
+        </div>
+
+        <div id="spotlight" class="section">
+            <h2>Spotlight</h2>
+            <ul id="spotlightList">
+                <li>Achievement: Top Scorer (2025-03-27)</li>
+            </ul>
+        </div>
+
+        <div id="marks" class="section">
+            <h2>Marks</h2>
+            <table id="marksTable">
+                <tr><th>Subject</th><th>Score</th><th>Grade</th><th>Comments</th></tr>
+                <tr><td>Math</td><td>85/100</td><td>A</td><td>Great work!</td></tr>
+            </table>
+            <p id="noMarksMessage" style="display: none;">No marks available.</p>
+        </div>
+
+        <div id="submit-assignments" class="section">
+            <h2>Submit Assignments</h2>
+            <form id="assignmentForm" enctype="multipart/form-data" onsubmit="submitAssignment(event)">
+                <div style="margin-bottom: 15px;">
+                    <label for="assignment_title">Assignment Title:</label>
+                    <select name="assignment_title" id="assignment_title" required>
+                        <option value="">Select an assignment</option>
+                        <option value="Project 1" data-deadline="2025-04-01">Project 1 (Due: 2025-04-01)</option>
+                        <option value="Quiz 1" data-deadline="2025-03-30">Quiz 1 (Due: 2025-03-30)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="assignment_file">Upload File:</label>
+                    <input type="file" name="assignment_file" id="assignment_file" accept=".pdf,.doc,.docx" required>
+                </div>
+                <input type="hidden" name="deadline" id="deadline">
+                <button type="submit" class="button">Submit Assignment</button>
+            </form>
+            <p id="submissionMessage" style="margin-top: 10px; display: none;"></p>
+        </div>
+
+        <div id="progress" class="section">
+            <h2>Progress</h2>
+            <table id="progressTable">
+                <tr><th>Subject</th><th>Progress</th></tr>
+                <tr><td>Math</td><td><div class="progress-bar"><div class="progress" style="width: 85%;">85%</div></div></td></tr>
+            </table>
+        </div>
+
+        <div id="content" class="section">
+            <h2>Course Content</h2>
+            <ul id="quizList">
+                <li>Quiz 1 - <button class="button" onclick="startQuiz(1)">Start</button></li>
+            </ul>
+        </div>
+
+        <div id="lectures" class="section">
+            <h2>Lectures</h2>
+            <ul id="lectureList">
+                <li>Introduction to CS - <button class="button" onclick="window.open('#', '_blank')">Play</button></li>
+            </ul>
+        </div>
+
+        <div id="contact-faculty" class="section">
+            <h2>Contact Faculty</h2>
+            <div class="faculty-item">
+                <span>Dr. Smith</span>
+                <button class="message-btn" onclick="openChat('1', 'Dr. Smith')">Message</button>
+            </div>
+        </div>
+
+        <div id="contact-alumni" class="section">
+            <h2>Contact Alumni</h2>
+            <div class="alumni-item">
+                <span>Jane Alumni</span>
+                <button class="message-btn" style="background: linear-gradient(135deg, #d35400, #e67e22);" onclick="openChat('2', 'Jane Alumni')">Message</button>
+            </div>
+        </div>
+
+        <div id="code-platform" class="section">
+            <h2>Code Platform</h2>
+            <select id="codeLanguage" onchange="updateCodeEditor()">
+                <option value="c">C</option>
+                <option value="cpp">C++</option>
+                <option value="javascript">JavaScript</option>
+                <option value="python">Python</option>
+            </select>
+            <button class="button" onclick="runCode()">Run</button>
+            <div class="code-editor">
+                <textarea id="codeEditor"></textarea>
+            </div>
+            <div class="code-output">
+                <h3>Output</h3>
+                <div id="codeOutput"></div>
+            </div>
+        </div>
+
+        <div id="digital-id" class="section">
+            <h2>Digital ID Card</h2>
+            <div class="id-card">
+                <div class="id-header">
+                    <h3>John Doe</h3>
+                    <p>ID: DRS12345</p>
+                </div>
+                <div id="qrcode" class="qrcode"></div>
+                <div class="id-footer">
+                    <p>DRS Institute of Technology</p>
+                    <p>Valid Until: March 31, 2026</p>
+                </div>
+            </div>
+            <button class="button" onclick="downloadIdCard()">Download</button>
+        </div>
+    </div>
+
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header"><span id="chatTitle"></span><button onclick="closeChat()">✖</button></div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-footer"><input type="text" id="chatInput" placeholder="Type a message..."><button onclick="sendMessage()">Send</button></div>
+    </div>
+
+    <footer><p>© 2025 DRS Institute Of Technology. All rights reserved.</p></footer>
+
+    <script>
+        let recipientId = '', codeEditor, eventSource, lastUpdate = 0, lastMessageId = 0;
+        const studentId = '12345'; // Mock student ID
+
+        document.getElementById('mySidenav').addEventListener('click', e => {
+            if (e.target.closest('.nav-link')) toggleNav();
+        });
+
+        document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', e => {
+            e.preventDefault();
+            const id = l.getAttribute('href').slice(1);
+            setActiveSection(id);
+        }));
+
+        function toggleNav() {
+            ['mySidenav', 'mainContent', 'myHeader'].forEach(id => document.getElementById(id).classList.toggle('expanded'));
+        }
+
+        function setActiveSection(id) {
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.toggle('active', n.getAttribute('href') === `#${id}`));
+            document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === id));
+            document.getElementById('headerTitle').textContent = `Student Panel - DRS Institute of Technology - ${document.getElementById(id).querySelector('h2').textContent}`;
+        }
+
+        function updateDisplay(target, data) {
+            const displays = {
+                spotlight: d => `<li>${d.content} (${new Date(d.created_at).toLocaleString()})</li>`,
+                marks: d => `<tr><td>${d.subject || 'N/A'}</td><td>${d.score || 0}/100</td><td>${d.grade || 'N/A'}</td><td>${d.comments || 'No comments'}</td></tr>`,
+                attendance: d => `<tr><td>${d.date || 'N/A'}</td><td>${d.status || 'Unknown'}</td></tr>`,
+                progress: d => `<tr><td>${d.subject || 'N/A'}</td><td><div class="progress-bar"><div class="progress" style="width:${d.score || 0}%">${d.score || 0}%</div></div></td></tr>`,
+                content: d => `<li>${d.title || 'Untitled'} - <button class="button" onclick="startQuiz(${d.id || 0})">Start</button></li>`,
+                notifications: d => `<li class="${d.content.startsWith('Warning') ? 'warning' : ''}">${d.content || 'No content'} (${new Date(d.created_at).toLocaleString()})</li>`,
+                lectures: d => `<li>${d.title || 'Untitled'} - <button class="button" onclick="window.open('${d.file_path || '#'}','_blank')">Play</button></li>`,
+                messages: d => `
+                    <div class="message ${d.sender_id === studentId ? 'sent' : 'received'}">
+                        <strong>${d.sender_name || 'Unknown'}:</strong> ${d.message || 'No message'}
+                        <small>(${new Date(d.timestamp).toLocaleString()})</small>
+                    </div>`
+            };
+
+            const el = document.getElementById(`${target}List`) || document.getElementById(`${target}Table`) || document.getElementById('chatBody');
+            if (!el || !displays[target]) return;
+
+            const isTable = el.tagName === 'TABLE';
+            const header = isTable ? `<tr>${el.querySelector('tr').innerHTML}</tr>` : '';
+            const content = data && data.length ? data.map(displays[target]).join('') : '<li>No data available</li>';
+            el.innerHTML = isTable ? header + content : content;
+
+            if (target === 'marks') {
+                document.getElementById('noMarksMessage').style.display = data && data.length ? 'none' : 'block';
+            }
+            if (target === 'messages') {
+                el.scrollTop = el.scrollHeight;
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message && recipientId) {
+                const timestamp = new Date().toLocaleString();
+                const chatBody = document.getElementById('chatBody');
+                chatBody.innerHTML += `
+                    <div class="message sent">
+                        <strong>John Doe:</strong> ${message}
+                        <small>(${timestamp})</small>
+                    </div>`;
+                chatBody.scrollTop = chatBody.scrollHeight;
+                input.value = '';
+                input.focus();
+                // Mock API call (replace with actual fetch in production)
+                console.log(`Sending message to ${recipientId}: ${message}`);
+            }
+        }
+
+        function fetchMessages(recipientId) {
+            // Mock messages
+            const mockMessages = [
+                { sender_id: studentId, sender_name: 'John Doe', message: 'Hello!', timestamp: new Date().toISOString() },
+                { sender_id: '1', sender_name: 'Dr. Smith', message: 'Hi there!', timestamp: new Date().toISOString() }
+            ];
+            updateDisplay('messages', mockMessages);
+        }
+
+        function setupRealTimeUpdates() {
+            // Mock real-time updates
+            setInterval(() => {
+                if (recipientId) {
+                    fetchMessages(recipientId);
+                }
+            }, 5000);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `
+            .message.sent { text-align: right; background: #e0f7fa; padding: 5px; margin: 5px 0; border-radius: 5px; }
+            .message.received { text-align: left; background: #f1f1f1; padding: 5px; margin: 5px 0; border-radius: 5px; }
+        `;
+        document.head.appendChild(style);
+
+        function openChat(id, name) {
+            recipientId = id;
+            lastMessageId = 0;
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.add('active');
+            document.getElementById('chatTitle').textContent = `Chat with ${name}`;
+            document.getElementById('chatBody').innerHTML = '';
+            const chatInput = document.getElementById('chatInput');
+            chatInput.value = '';
+            chatInput.disabled = false;
+            chatInput.focus();
+            fetchMessages(recipientId);
+        }
+
+        function closeChat() {
+            document.getElementById('chatWindow').classList.remove('active');
+            recipientId = '';
+        }
+
+        function submitQuery() {
+            const query = document.getElementById('attendanceQuery')?.value.trim();
+            if (query) {
+                console.log(`Submitting query: ${query}`);
+                alert('Query submitted successfully!');
+            }
+        }
+
+        function startQuiz(id) {
+            console.log(`Starting quiz ${id}`);
+            alert(`Starting quiz ${id}`);
+        }
+
+        function initializeCodeEditor() {
+            if (!codeEditor) {
+                codeEditor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+                    lineNumbers: true,
+                    mode: 'text/x-csrc',
+                    theme: 'default'
+                });
+                updateCodeEditor();
+            }
+        }
+
+        function updateCodeEditor() {
+            const lang = document.getElementById('codeLanguage').value;
+            codeEditor.setOption('mode', lang === 'python' ? 'python' : lang === 'javascript' ? 'javascript' : 'text/x-csrc');
+            codeEditor.setValue(`// Sample ${lang} code\n${lang === 'python' ? 'print("Hello")' : 'console.log("Hello")'}`);
+        }
+
+        function runCode() {
+            document.getElementById('codeOutput').textContent = 'Mock Output: Hello\n(Note: Full execution requires backend.)';
+        }
+
+        function generateDigitalId() {
+            new QRCode(document.getElementById('qrcode'), {
+                text: `Student: John Doe, ID: DRS12345`,
+                width: 150,
+                height: 150
+            });
+        }
+
+        function downloadIdCard() {
+            html2canvas(document.querySelector('.id-card')).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'John_Doe_ID.png';
+                link.click();
+            });
+        }
+
+        function logout() {
+            console.log('Logging out...');
+            window.location.href = '#'; // Replace with actual logout URL
+        }
+
+        function updatePersonalDetails(event) {
+            event.preventDefault();
+            const form = document.getElementById('personalDetailsForm');
+            const formData = new FormData(form);
+            console.log('Updating personal details:', Object.fromEntries(formData));
+            alert('Details updated successfully!');
+            // Mock API call (replace with actual fetch in production)
+        }
+
+        function fetchCourseAttendance() {
+            // Mock course attendance data
+            const mockData = [
+                { course_name: 'Computer Science', total_days: 30, present_days: 25, attendance_percentage: 83 }
+            ];
+            updateCourseAttendanceDisplay(mockData);
+        }
+
+        function updateCourseAttendanceDisplay(data) {
+            const tableBody = document.querySelector('#courseAttendanceTable tbody');
+            if (!tableBody) return;
+            tableBody.innerHTML = data.map(record => `
+                <tr>
+                    <td>${record.course_name}</td>
+                    <td>${record.total_days}</td>
+                    <td>${record.present_days}</td>
+                    <td style="color: ${record.attendance_percentage < 50 ? 'red' : 'green'};">${record.attendance_percentage}%</td>
+                </tr>
+            `).join('');
+        }
+
+        function submitAssignment(event) {
+            event.preventDefault();
+            const form = document.getElementById('assignmentForm');
+            const formData = new FormData(form);
+            const selectedOption = document.getElementById('assignment_title').selectedOptions[0];
+            const deadline = selectedOption ? selectedOption.getAttribute('data-deadline') : '';
+            formData.append('deadline', deadline);
+            console.log('Submitting assignment:', Object.fromEntries(formData));
+            const messageEl = document.getElementById('submissionMessage');
+            messageEl.style.display = 'block';
+            messageEl.textContent = 'Assignment submitted successfully!';
+            messageEl.style.color = 'green';
+            form.reset();
+            setTimeout(() => { messageEl.style.display = 'none'; }, 3000);
+            // Mock API call (replace with actual fetch in production)
+        }
+
+        window.onload = () => {
+            const chatInput = document.getElementById('chatInput');
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            fetchCourseAttendance();
+            setActiveSection('personal-details');
+            setupRealTimeUpdates();
+            document.getElementById('code-platform').addEventListener('click', initializeCodeEditor);
+            document.getElementById('digital-id').addEventListener('click', generateDigitalId);
+
+            // Mock initial data
+            updateDisplay('marks', [{ subject: 'Math', score: 85, grade: 'A', comments: 'Great work!' }]);
+            updateDisplay('notifications', [{ content: 'Sample Notification', created_at: new Date().toISOString() }]);
+            updateDisplay('spotlight', [{ content: 'Achievement: Top Scorer', created_at: new Date().toISOString() }]);
+            updateDisplay('content', [{ title: 'Quiz 1', id: 1 }]);
+            updateDisplay('lectures', [{ title: 'Introduction to CS', file_path: '#' }]);
+            updateDisplay('progress', [{ subject: 'Math', score: 85 }]);
+        };
+    </script>
+</body>
+</html>

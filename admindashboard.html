@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DRS Institute of Technology</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e67e22;
+            --light-bg: #f5f7fa;
+            --white: #ffffff;
+            --text: #333333;
+            --border: #e0e4e8;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 70px;
+            width: calc(100% - 70px);
+            background: var(--white);
+            padding: 20px 30px;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .header.expanded {
+            left: 250px;
+            width: calc(100% - 250px);
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header .admin-name {
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .header .logout-btn {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .header .logout-btn:hover {
+            background: #d35400;
+        }
+
+        .sidenav {
+            height: 100%;
+            width: 70px;
+            position: fixed;
+            z-index: 11;
+            top: 0;
+            left: 0;
+            background: linear-gradient(180deg, var(--primary), #1a252f);
+            transition: var(--transition);
+            padding-top: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidenav.expanded {
+            width: 250px;
+        }
+
+        .sidenav a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 16px;
+            color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .sidenav a:hover, .sidenav a.active {
+            background: var(--secondary);
+            color: var(--white);
+        }
+
+        .sidenav a i {
+            min-width: 30px;
+            margin-right: 15px;
+        }
+
+        .sidenav .text {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidenav.expanded .text {
+            display: inline;
+            opacity: 1;
+        }
+
+        .main {
+            margin-left: 70px;
+            padding: 90px 30px 30px;
+            transition: var(--transition);
+            min-height: 100vh;
+        }
+
+        .main.expanded {
+            margin-left: 250px;
+        }
+
+        .section {
+            display: none;
+            padding: 30px;
+            background: var(--white);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent);
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #home {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: var(--white);
+            border-left: none;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 20px 0 10px;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+
+        .button {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .button:hover {
+            background: #d35400;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--white);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f9fbfd;
+        }
+
+        .alert {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc2626;
+        }
+
+        .id-card {
+            width: 320px;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .id-header {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 15px;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px;
+        }
+
+        .qrcode {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+
+        .id-footer {
+            background: var(--light-bg);
+            padding: 10px;
+            border-radius: 0 0 10px 10px;
+            margin: 20px -20px -20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .sidenav { width: 0; }
+            .main { margin-left: 0; }
+            .header { left: 0; width: 100%; }
+            .sidenav.expanded { width: 200px; }
+            .main.expanded { margin-left: 200px; }
+            .header.expanded { left: 200px; width: calc(100% - 200px); }
+            .section { padding: 20px; }
+            h2 { font-size: 20px; }
+            table { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header" id="myHeader">
+        <h1 id="headerTitle">DRS Institute of Technology - Admin Dashboard</h1>
+        <div class="user-info">
+            <span class="admin-name">Admin User</span>
+            <a href="index.html"><button class="logout-btn" type="button">Logout</button></a>
+        </div>
+    </div>
+
+    <div class="sidenav" id="mySidenav">
+        <a href="#home" class="nav-link active"><i class="fas fa-home"></i><span class="text">Home</span></a>
+        <a href="#user-management" class="nav-link"><i class="fas fa-users"></i><span class="text">User Management</span></a>
+        <a href="#course-management" class="nav-link"><i class="fas fa-book"></i><span class="text">Course Management</span></a>
+        <a href="#enrollment" class="nav-link"><i class="fas fa-user-plus"></i><span class="text">Enrollment Approval</span></a>
+        <a href="#attendance" class="nav-link"><i class="fas fa-user-check"></i><span class="text">Attendance Monitoring</span></a>
+        <a href="#grades" class="nav-link"><i class="fas fa-edit"></i><span class="text">Exams & Grades</span></a>
+        <a href="#notifications" class="nav-link"><i class="fas fa-bell"></i><span class="text">Notifications</span></a>
+        <a href="#resources" class="nav-link"><i class="fas fa-folder"></i><span class="text">Resources</span></a>
+        <a href="#ai-alerts" class="nav-link"><i class="fas fa-exclamation-triangle"></i><span class="text">AI Attendance Alerts</span></a>
+        <a href="#messages" class="nav-link"><i class="fas fa-envelope"></i><span class="text">Messages Overview</span></a>
+        <a href="#code-submissions" class="nav-link"><i class="fas fa-code"></i><span class="text">Code Submissions</span></a>
+        <a href="#digital-id" class="nav-link"><i class="fas fa-id-card"></i><span class="text">Digital ID</span></a>
+        <a href="#study-streak" class="nav-link"><i class="fas fa-fire"></i><span class="text">Study Streak</span></a>
+    </div>
+
+    <div class="main" id="mainContent">
+        <div id="home" class="section active">
+            <h2>Welcome, Admin!</h2>
+            <p>Manage the DRS Institute of Technology system efficiently with this modern dashboard.</p>
+        </div>
+
+        <div id="user-management" class="section">
+            <h2>User Management</h2>
+            <div class="form-group">
+                <h3>Add New User</h3>
+                <form id="addUserForm">
+                    <label>Username:</label><input type="text" name="username" required>
+                    <label>Password:</label><input type="password" name="password" required>
+                    <label>User Type:</label>
+                    <select name="user_type">
+                        <option value="student">Student</option>
+                        <option value="faculty">Faculty</option>
+                    </select>
+                    <button type="submit" class="button">Add User</button>
+                </form>
+            </div>
+            <h3>Edit Student Details</h3>
+            <form id="studentDetailsForm">
+                <select name="student_id">
+                    <option value="">Select Student</option>
+                    <option value="1">John Doe</option>
+                    <option value="2">Jane Smith</option>
+                    <option value="3">Robert Johnson</option>
+                </select>
+                <div class="form-group">
+                    <label>Full Name:</label><input type="text" name="full_name">
+                    <label>Email:</label><input type="email" name="email">
+                    <label>Phone:</label><input type="tel" name="phone">
+                    <label>Address:</label><textarea name="address"></textarea>
+                    <label>Date of Birth:</label><input type="date" name="date_of_birth">
+                    <label>Emergency Contact:</label><input type="tel" name="emergency_contact">
+                </div>
+                <button type="submit" class="button">Update</button>
+            </form>
+            <h3>Existing Users</h3>
+            <table id="usersTable">
+                <tr><th>Username</th><th>Type</th><th>Status</th><th>Actions</th></tr>
+                <tr>
+                    <td>John Doe</td>
+                    <td>Student</td>
+                    <td>Approved</td>
+                    <td><button class="button" onclick="alert('Edit/Delete feature coming soon!')">Edit/Delete</button></td>
+                </tr>
+                <tr>
+                    <td>Jane Smith</td>
+                    <td>Student</td>
+                    <td>Pending</td>
+                    <td><button class="button" onclick="alert('Edit/Delete feature coming soon!')">Edit/Delete</button></td>
+                </tr>
+                <tr>
+                    <td>Prof. Williams</td>
+                    <td>Faculty</td>
+                    <td>Approved</td>
+                    <td><button class="button" onclick="alert('Edit/Delete feature coming soon!')">Edit/Delete</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="course-management" class="section">
+            <h2>Course Management</h2>
+            <table>
+                <tr><th>Course Name</th><th>Assigned Faculty</th><th>Actions</th></tr>
+                <tr>
+                    <td>Computer Science 101</td>
+                    <td>
+                        <select>
+                            <option value="">Select Faculty</option>
+                            <option value="1" selected>Prof. Williams</option>
+                            <option value="2">Dr. Johnson</option>
+                        </select>
+                        <button class="button">Assign</button>
+                    </td>
+                    <td><button class="button" onclick="alert('Edit/Delete course feature coming soon!')">Edit/Delete</button></td>
+                </tr>
+                <tr>
+                    <td>Mathematics 201</td>
+                    <td>
+                        <select>
+                            <option value="">Select Faculty</option>
+                            <option value="1">Prof. Williams</option>
+                            <option value="2" selected>Dr. Johnson</option>
+                        </select>
+                        <button class="button">Assign</button>
+                    </td>
+                    <td><button class="button" onclick="alert('Edit/Delete course feature coming soon!')">Edit/Delete</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="enrollment" class="section">
+            <h2>Student Enrollment Approval</h2>
+            <table>
+                <tr><th>Student Name</th><th>Status</th><th>Actions</th></tr>
+                <tr>
+                    <td>John Doe</td>
+                    <td>Approved</td>
+                    <td>
+                        <select>
+                            <option value="approved" selected>Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                        <button class="button">Update</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Jane Smith</td>
+                    <td>Pending</td>
+                    <td>
+                        <select>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="pending" selected>Pending</option>
+                        </select>
+                        <button class="button">Update</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="attendance" class="section">
+            <h2>Attendance Monitoring</h2>
+            <select id="studentFilter">
+                <option value="">Select Student</option>
+                <option value="1">John Doe</option>
+                <option value="2">Jane Smith</option>
+            </select>
+            <table id="studentAttendanceTable">
+                <tr><th>Course Name</th><th>Total Days</th><th>Present</th><th>Percentage</th></tr>
+                <tr><td>Computer Science 101</td><td>30</td><td>25</td><td>83.33%</td></tr>
+                <tr><td>Mathematics 201</td><td>25</td><td>20</td><td>80.00%</td></tr>
+            </table>
+            <h3>Overall Report</h3>
+            <table id="attendanceTable">
+                <tr><th>Student Name</th><th>Present</th><th>Total Classes</th><th>Percentage</th></tr>
+                <tr><td>John Doe</td><td>45</td><td>55</td><td>81.82%</td></tr>
+                <tr><td>Jane Smith</td><td>40</td><td>55</td><td>72.73%</td></tr>
+            </table>
+        </div>
+
+        <div id="grades" class="section">
+            <h2>Exams & Grades</h2>
+            <h3>Update Grade</h3>
+            <form id="gradeForm">
+                <select name="student_id">
+                    <option value="">Select Student</option>
+                    <option value="1">John Doe</option>
+                    <option value="2">Jane Smith</option>
+                </select>
+                <div class="form-group">
+                    <label>Subject:</label><input type="text" name="subject" required>
+                    <label>Score (0-100):</label><input type="number" name="score" min="0" max="100" required>
+                    <label>Grade:</label><input type="text" name="grade">
+                    <label>Comments:</label><textarea name="comments"></textarea>
+                </div>
+                <button type="submit" class="button">Update Grade</button>
+            </form>
+            <table id="gradesTable">
+                <tr><th>Student Name</th><th>Subject</th><th>Score</th><th>Grade</th><th>Comments</th></tr>
+                <tr><td>John Doe</td><td>Computer Science 101</td><td>85/100</td><td>B+</td><td>Good performance</td></tr>
+                <tr><td>Jane Smith</td><td>Mathematics 201</td><td>92/100</td><td>A</td><td>Excellent work</td></tr>
+            </table>
+        </div>
+
+        <div id="notifications" class="section">
+            <h2>Notifications & Announcements</h2>
+            <form id="notificationForm">
+                <div class="form-group">
+                    <label>Announcement:</label>
+                    <textarea name="content" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="button">Send</button>
+            </form>
+        </div>
+
+        <div id="resources" class="section">
+            <h2>Resources & Cloud Storage</h2>
+            <form id="resourceForm">
+                <div class="form-group">
+                    <label>Title:</label><input type="text" name="title" required>
+                    <label>File:</label><input type="file" name="resource" required>
+                </div>
+                <button type="submit" class="button">Upload</button>
+            </form>
+            <h3>Existing Resources</h3>
+            <ul>
+                <li>Course Syllabus - <a href="#" target="_blank">Download</a></li>
+                <li>Lecture Notes - <a href="#" target="_blank">Download</a></li>
+            </ul>
+            <h3>Assignment Submissions</h3>
+            <table id="submissionsTable">
+                <tr><th>Student</th><th>Title</th><th>Deadline</th><th>Status</th><th>File</th></tr>
+                <tr><td>John Doe</td><td>Midterm Project</td><td>2023-11-15</td><td>Submitted</td><td><a href="#" download>Download</a></td></tr>
+            </table>
+        </div>
+
+        <div id="ai-alerts" class="section">
+            <h2>AI Attendance Alerts</h2>
+            <div class="alert">
+                <p><strong>Jane Smith:</strong> Attendance is 72.73%</p>
+            </div>
+        </div>
+
+        <div id="messages" class="section">
+            <h2>Messages Overview</h2>
+            <table id="messagesTable">
+                <tr><th>Sender</th><th>Receiver</th><th>Message</th><th>Timestamp</th></tr>
+                <tr><td>John Doe</td><td>Prof. Williams</td><td>Question about assignment</td><td>2023-10-15 14:30</td></tr>
+            </table>
+        </div>
+
+        <div id="code-submissions" class="section">
+            <h2>Code Submissions</h2>
+            <p>Feature to review student code submissions coming soon!</p>
+        </div>
+
+        <div id="digital-id" class="section">
+            <h2>Digital ID</h2>
+            <select id="idStudentFilter">
+                <option value="">Select Student</option>
+                <option value="1">John Doe</option>
+                <option value="2">Jane Smith</option>
+            </select>
+            <div id="idCardContainer"></div>
+        </div>
+
+        <div id="study-streak" class="section">
+            <h2>Study Streak</h2>
+            <table id="streakTable">
+                <tr><th>Student Name</th><th>Streak (Days)</th></tr>
+                <tr><td>John Doe</td><td>15</td></tr>
+                <tr><td>Jane Smith</td><td>8</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Navigation toggle
+        document.getElementById('mySidenav').addEventListener('click', function() {
+            this.classList.toggle('expanded');
+            document.getElementById('mainContent').classList.toggle('expanded');
+            document.getElementById('myHeader').classList.toggle('expanded');
+        });
+
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.section');
+        const headerTitle = document.getElementById('headerTitle');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sectionId = this.getAttribute('href').substring(1);
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === sectionId) {
+                        section.classList.add('active');
+                        headerTitle.textContent = `DRS Institute of Technology - ${section.querySelector('h2').textContent}`;
+                    }
+                });
+            });
+        });
+
+        // Form submissions
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Form submitted (demo only - no backend connected)');
+                this.reset();
+            });
+        });
+
+        function generateDigitalId(studentId) {
+            if (studentId) {
+                const username = document.querySelector(`#idStudentFilter option[value="${studentId}"]`).text;
+                const container = document.getElementById('idCardContainer');
+                container.innerHTML = `
+                    <div class="id-card">
+                        <div class="id-header">
+                            <h3>${username}</h3>
+                            <p>ID: DRS${studentId}</p>
+                        </div>
+                        <div id="qrcode${studentId}" class="qrcode"></div>
+                        <div class="id-footer">
+                            <p>DRS Institute of Technology</p>
+                            <p>Valid Until: March 31, 2026</p>
+                        </div>
+                    </div>`;
+                new QRCode(document.getElementById(`qrcode${studentId}`), {
+                    text: `Student: ${username}, ID: DRS${studentId}`,
+                    width: 150,
+                    height: 150
+                });
+            }
+        }
+
+        // Logout
+        function logout() {
+            alert('Logout functionality would redirect to login page');
+        }
+
+        // Initialize
+        window.onload = function() {
+            // Demo initialization
+            document.getElementById('idStudentFilter').addEventListener('change', function() {
+                generateDigitalId(this.value);
+            });
+        };
+    </script>
+</body>
